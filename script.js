@@ -1435,6 +1435,8 @@ function openProjectExamples(categoryId) {
     currentExampleIndex = 0;
     renderProjectExample();
     document.getElementById('exampleModal').hidden = false;
+    // Ladda de andra exemplen i bakgrunden så bläddringen går direkt
+    preloadProjectExamples(categoryId);
 }
 window.openProjectExamples = openProjectExamples;
 
@@ -1473,29 +1475,53 @@ function renderProjectExample() {
 
     const imageEl = document.getElementById('exampleImage');
     const videoEl = document.getElementById('exampleVideo');
-
-    // Visa platshållaren direkt så rutan aldrig är tom medan vi letar efter filen
-    videoEl.pause();
-    videoEl.removeAttribute('src');
-    videoEl.style.display = 'none';
-    imageEl.src = EXAMPLE_PLACEHOLDER_MEDIA;
     imageEl.alt = example.title;
-    imageEl.style.display = 'block';
+
+    const isStillCurrent = () => currentExampleCategory === categoryId && currentExampleIndex === index;
+
+    // Är filen inte laddad än göms bilden tills den är klar, istället för att
+    // platshållaren fladdrar förbi. Platshållaren visas bara om filen saknas.
+    if (!exampleMediaCache[`${categoryId}-${index}`]) {
+        imageEl.classList.add('is-loading');
+        videoEl.classList.add('is-loading');
+    }
 
     resolveExampleMedia(categoryId, index, (media) => {
         // Hoppa över om användaren redan bläddrat vidare medan vi letade
-        if (currentExampleCategory !== categoryId || currentExampleIndex !== index) return;
+        if (!isStillCurrent()) return;
 
         if (media.type === 'video') {
             imageEl.style.display = 'none';
             videoEl.src = media.url;
             videoEl.style.display = 'block';
             videoEl.play().catch(() => {});
+            const reveal = () => { if (isStillCurrent()) videoEl.classList.remove('is-loading'); };
+            if (videoEl.readyState >= 2) reveal();
+            else videoEl.addEventListener('loadeddata', reveal, { once: true });
         } else {
+            videoEl.pause();
+            videoEl.removeAttribute('src');
+            videoEl.style.display = 'none';
             imageEl.src = media.url;
+            imageEl.style.display = 'block';
+            // Vänta tills bilden är avkodad så den visas hel på en gång
+            imageEl.decode().catch(() => {}).then(() => {
+                if (isStillCurrent()) imageEl.classList.remove('is-loading');
+            });
         }
     });
 }
+
+// Förladda alla exempel för en kategori (anropas när rutan öppnas och när
+// man för musen över "Se projektexempel")
+function preloadProjectExamples(categoryId) {
+    const examples = window.projectExamples && window.projectExamples[categoryId];
+    if (!examples) return;
+    examples.forEach((_, i) => resolveExampleMedia(categoryId, i, () => {}));
+}
+
+// Pågående sökningar, så samma fil inte letas efter flera gånger samtidigt
+const exampleMediaPending = {};
 
 function resolveExampleMedia(categoryId, index, callback) {
     const cacheKey = `${categoryId}-${index}`;
@@ -1503,25 +1529,42 @@ function resolveExampleMedia(categoryId, index, callback) {
         callback(exampleMediaCache[cacheKey]);
         return;
     }
+    if (exampleMediaPending[cacheKey]) {
+        exampleMediaPending[cacheKey].push(callback);
+        return;
+    }
+    exampleMediaPending[cacheKey] = [callback];
+
+    const done = (result) => {
+        exampleMediaCache[cacheKey] = result;
+        const callbacks = exampleMediaPending[cacheKey];
+        delete exampleMediaPending[cacheKey];
+        callbacks.forEach(cb => cb(result));
+    };
 
     const baseName = window.categoryFileNames[categoryId];
     const basePath = `${EXAMPLE_MEDIA_FOLDER}${baseName}-${index + 1}`;
 
     probeExtensions(basePath, EXAMPLE_IMAGE_EXTENSIONS, 'image', (imageUrl) => {
-        if (imageUrl) {
-            const result = { type: 'image', url: imageUrl };
-            exampleMediaCache[cacheKey] = result;
-            return callback(result);
-        }
+        if (imageUrl) return done({ type: 'image', url: imageUrl });
         probeExtensions(basePath, EXAMPLE_VIDEO_EXTENSIONS, 'video', (videoUrl) => {
-            const result = videoUrl
+            done(videoUrl
                 ? { type: 'video', url: videoUrl }
-                : { type: 'image', url: EXAMPLE_PLACEHOLDER_MEDIA };
-            exampleMediaCache[cacheKey] = result;
-            callback(result);
+                : { type: 'image', url: EXAMPLE_PLACEHOLDER_MEDIA });
         });
     });
 }
+
+// Börja ladda bilderna redan när musen (eller tangentbordsfokus) hamnar på
+// "Se projektexempel" - då är de oftast klara när man klickar
+['pointerover', 'focusin'].forEach(eventName => {
+    document.addEventListener(eventName, (event) => {
+        const link = event.target.closest && event.target.closest('.example-link');
+        if (!link) return;
+        const match = (link.getAttribute('onclick') || '').match(/'(category[A-O])'/);
+        if (match) preloadProjectExamples(match[1]);
+    });
+});
 
 function probeExtensions(basePath, extensions, kind, callback, i = 0) {
     if (i >= extensions.length) return callback(null);
