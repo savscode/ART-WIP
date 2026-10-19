@@ -1,0 +1,138 @@
+<!-- Försättsblad, bara för PDF-exporten (motsvarar inte någon sida på webbplatsen).
+     Grå panel med ART-motivet (vänsterställd, inte helsidig), vit sidbakgrund,
+     FOJAB-logga ovanför panelen, "ART-bestämning"/"Projekt:" under panelen.
+
+     Diagonalen byggs med rotation + overflow:hidden (INTE clip-path) eftersom
+     html2canvas - biblioteket som fångar varje sida till PDF - har opålitlig
+     clip-path-support. Vinkeln (29.8deg) är beräknad med samma formel som
+     index.html (atan2(höjd, bredd)) men för panelens egna fasta mått
+     (1080x620px) istället för hela sidan. -->
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <title>Försättsblad</title>
+    <style>
+        @font-face {
+            font-family: 'CircularStd-Bold';
+            src: url('font/CircularStd-Bold.otf') format('opentype');
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'CircularStd-Bold', sans-serif;
+            background-color: #ffffff;
+        }
+
+        .cover {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        .fojab-logo {
+            position: absolute;
+            top: 30px;
+            left: 40px;
+            height: 24px;
+            width: auto;
+            z-index: 3;
+        }
+
+        .art-panel {
+            position: absolute;
+            top: 110px;
+            left: 0;
+            width: 1080px;
+            height: 620px;
+            overflow: hidden;
+            background-color: #ebebeb;
+        }
+
+        .diagonal-rotator {
+            position: absolute;
+            width: 250%;
+            height: 250%;
+            top: -75%;
+            left: -75%;
+            display: flex;
+            transform: rotate(29.8deg);
+            transform-origin: center;
+        }
+
+        .diagonal-rotator .dark-half {
+            width: 50%;
+            height: 100%;
+            background-color: #d7d7d7;
+        }
+
+        .diagonal-rotator .light-half {
+            width: 50%;
+            height: 100%;
+            background-color: #ebebeb;
+        }
+
+        .center-text {
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+            font-size: clamp(40px, 9vw, 80px);
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            letter-spacing: clamp(6px, 2.4vw, 16px);
+        }
+
+        .center-text .A,
+        .center-text .T {
+            display: inline-block;
+            transform: translateY(-32px);
+        }
+
+        .center-text .R {
+            display: inline-block;
+            transform: translateY(44px);
+        }
+
+        /* Under panelen: ART-bestämning + projekt, samma storlek som
+           H1-rubrikerna på övriga sidor (.header h1 i step-common.css) */
+        .cover-info {
+            position: absolute;
+            left: 40px;
+            bottom: 50px;
+            line-height: 1.2;
+            color: #000000;
+        }
+
+        .cover-info div {
+            font-size: clamp(2.2em, 5vw, 4em);
+            font-family: 'CircularStd-Bold', Arial, sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <div class="cover">
+        <img class="fojab-logo" src="Symbols/FOJAB_LOGO_DARK.svg" alt="FOJAB">
+        <div class="art-panel">
+            <div class="diagonal-rotator">
+                <div class="dark-half"></div>
+                <div class="light-half"></div>
+            </div>
+            <div class="center-text">
+                <span class="A">A</span>
+                <span class="R">R</span>
+                <span class="T">T</span>
+            </div>
+        </div>
+        <div class="cover-info">
+            <div>ART-bestämning</div>
+            <div>Projekt: <span id="coverProjectName"></span></div>
+        </div>
+    </div>
+</body>
+</html>

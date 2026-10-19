@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimera R: Resursanvändning</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="step-common.css">
+    <link rel="stylesheet" href="project-examples.css">
+</head>
+<body class="resources-page">
+    <div class="header">
+        <h1>Minimera R: Resursanvändning</h1>
+        <p>Resursanvändningen ska minimeras både i bygg- och användningsskede. Det handlar om låg förbrukning av energi, uppvärmning, material, avfall, vatten och ett smart markutnyttjande. Det handlar också om att bättre nyttja de resurser som redan finns i befintlig byggd struktur, i form av t ex omfördelning och cirkulära flöden.
+        </p>
+    </div>
+    <div class="container">
+        <div class="column">
+            <h2>KLIMATAVTRYCK</h2>
+            <p>Minimera mängden växthusgaser som frigörs till atmosfären...
+            <span class="more-text">i anslutning till projektets genomförande sett till hela livscykeln. Beakta orientering på platsen, geometri, design, formfaktor, stomval, materialens klimatavtryck och möjlighet till återbruk. Utred möjliga kompensatoriska åtgärder för att balansera klimatkalkylen som t.ex. biokol, inbyggt biogent kol, grönska och lokal elproduktion. Ett kraftigt minskat klimatavtryck från bygg- och anläggningsbranschen är en viktig nyckel för att klara Parisavtalets klimatmål avseende minskat global uppvärmning och leva upp till den nationella färdplanen för ett fossilfritt Sverige till 2045.</span>
+            </p>
+            <div class="toggle-button" onclick="toggleText(this)">
+                <i class="fa-solid fa-arrow-up"></i>
+            </div>
+            <span class="example-link" onclick="openProjectExamples('categoryF')">Se projektexempel</span>
+            <label for="categoryF">På en skala från ett till fem, hur prioriterat är arbetet med Klimatavtryck i det aktuella projektet?</label>
+            <div class="number-options" id="numberOptionsF">
+                <span onclick="selectNumber(this, 'categoryF')">1</span>
+                <span onclick="selectNumber(this, 'categoryF')">2</span>
+                <span onclick="selectNumber(this, 'categoryF')">3</span>
+                <span onclick="selectNumber(this, 'categoryF')">4</span>
+                <span onclick="selectNumber(this, 'categoryF')">5</span>
+            </div>
+            <input type="hidden" id="categoryF" name="categoryF">
+            <label for="commentsF">Kommentarer:</label>
+            <textarea id="commentsF" name="commentsF" rows="4"></textarea>
+        </div>
+        <div class="column">
+            <h2>MARK</h2>
+            <p>Minimera arealen oexploaterad mark som tas i anspråk...
+            <span class="more-text">för byggnation genom att prioritera redan exploaterad mark för förtätning. Undvik nybyggnation på jordbruks-, skogs- och ängsmark. Bygg till, om och förädla i befintliga strukturer. Tillför gröna och blå värden till all icke-exploaterad urban yta och undvik att spränga bort berg. I centrala stadslägen kan det vara motiverad med hög exploatering för att utnyttja marken på bästa sätt.</span>
+            </p>
+            <div class="toggle-button" onclick="toggleText(this)">
+                <i class="fa-solid fa-arrow-up"></i>
+            </div>
+            <span class="example-link" onclick="openProjectExamples('categoryG')">Se projektexempel</span>
+            <label for="categoryG">På en skala från ett till fem, hur prioriterat är arbetet med Mark i det aktuella projektet?
+            </label>
+            <div class="number-options" id="numberOptionsG">
+                <span onclick="selectNumber(this, 'categoryG')">1</span>
+                <span onclick="selectNumber(this, 'categoryG')">2</span>
+                <span onclick="selectNumber(this, 'categoryG')">3</span>
+                <span onclick="selectNumber(this, 'categoryG')">4</span>
+                <span onclick="selectNumber(this, 'categoryG')">5</span>
+            </div>
+            <input type="hidden" id="categoryG" name="categoryG">
+            <label for="commentsG">Kommentarer:</label>
+            <textarea id="commentsG" name="commentsG" rows="4"></textarea>
+        </div>
+        <div class="column">
+            <h2>ENERGI</h2>
+            <p>Minimera mängden energi som byggnaden/anläggningen förbrukar...
+                <span class="more-text">Beakta besparande och generativa lösningar för el, vatten och värme. Detta kan göras genom lokal energiproduktion, batterilösningar och delning av el inom grannskap för att kapa effekttoppar. Andra lösningar är omhändertagande och användning av regnvatten för att spara på färskvattenförbrukning. Beakta även isolering, glasmängder, köldbryggor och tekniska system. Att synliggöra energiförbrukning och att acceptera ett mer generöst temperaturspann på inomhustemperatur är exempel på energibesparande åtgärder som kan göra stor skillnad.</span>
+            </p>
+            <div class="toggle-button" onclick="toggleText(this)">
+                <i class="fa-solid fa-arrow-up"></i>
+            </div>
+            <span class="example-link" onclick="openProjectExamples('categoryH')">Se projektexempel</span>
+            <label for="categoryH">På en skala från ett till fem, hur prioriterat är arbetet med Energi i det aktuella projektet?</label>
+            <div class="number-options" id="numberOptionsH">
+                <span onclick="selectNumber(this, 'categoryH')">1</span>
+                <span onclick="selectNumber(this, 'categoryH')">2</span>
+                <span onclick="selectNumber(this, 'categoryH')">3</span>
+                <span onclick="selectNumber(this, 'categoryH')">4</span>
+                <span onclick="selectNumber(this, 'categoryH')">5</span>
+            </div>
+            <input type="hidden" id="categoryH" name="categoryH">
+            <label for="commentsH">Kommentarer:</label>
+            <textarea id="commentsH" name="commentsH" rows="4"></textarea>
+        </div>
+        <div class="column">
+            <h2>PENGAR</h2>
+            <p>Ekonomi betyder hushållning. Det är viktigt att hushålla...
+                <span class="more-text">med alla resurser, även de ekonomiska. Kundens/samhällets ekonomiska satsning ska ge så stort hållbarhetsvärde som möjligt i relation till investeringen. Identifiera lågt hängande frukter i det aktuella projektet utifrån principen mesta hållbarhetsnytta per krona. Förstå kundens affär och behov. Beakta möjligheten till hållbarhetscertifiering och grön finansiering som ett sätt att öka det långsiktiga värdet. Förstå kundens affär och vilka behov som kundens slutkund har.</span>
+            </p>
+            <div class="toggle-button" onclick="toggleText(this)">
+                <i class="fa-solid fa-arrow-up"></i>
+            </div>
+            <span class="example-link" onclick="openProjectExamples('categoryI')">Se projektexempel</span>
+            <label for="categoryI">På en skala från ett till fem, hur prioriterat är arbetet med Pengar i det aktuella projektet?
+            </label>
+            <div class="number-options" id="numberOptionsI">
+                <span onclick="selectNumber(this, 'categoryI')">1</span>
+                <span onclick="selectNumber(this, 'categoryI')">2</span>
+                <span onclick="selectNumber(this, 'categoryI')">3</span>
+                <span onclick="selectNumber(this, 'categoryI')">4</span>
+                <span onclick="selectNumber(this, 'categoryI')">5</span>
+            </div>
+            <input type="hidden" id="categoryI" name="categoryI">
+            <label for="commentsI">Kommentarer:</label>
+            <textarea id="commentsI" name="commentsI" rows="4"></textarea>
+        </div>
+        <div class="column">
+            <h2>RESURSUTNYTTJANDE</h2>
+            <p>Var sparsam med jordens resurser och minimera råvarutvinning...
+                <span class="more-text">Beakta materialet härkomst, undvik skadliga ämnen och arbeta med designen för att minska mängden materialspill. Beakta möjligheten till återbruk eller återvinning av olika material och produkter. Uppmuntra till cirkularitet och minimera mängden avfall och spill som genereras i projektet, även i driftskedet. Undvik rivning - se och uppmärksamma värdet i det befintliga beståndet!</span>
+            </p>
+            <div class="toggle-button" onclick="toggleText(this)">
+                <i class="fa-solid fa-arrow-up"></i>
+            </div>
+            <span class="example-link" onclick="openProjectExamples('categoryJ')">Se projektexempel</span>
+            <label for="categoryJ">På en skala från ett till fem, hur prioriterat är arbetet med Resursutnyttjande i det aktuella projektet?
+            </label>
+            <div class="number-options" id="numberOptionsJ">
+                <span onclick="selectNumber(this, 'categoryJ')">1</span>
+                <span onclick="selectNumber(this, 'categoryJ')">2</span>
+                <span onclick="selectNumber(this, 'categoryJ')">3</span>
+                <span onclick="selectNumber(this, 'categoryJ')">4</span>
+                <span onclick="selectNumber(this, 'categoryJ')">5</span>
+            </div>
+            <input type="hidden" id="categoryJ" name="categoryJ">
+            <label for="commentsJ">Kommentarer:</label>
+            <textarea id="commentsJ" name="commentsJ" rows="4"></textarea>
+        </div>
+    </div>
+</body>
+</html>

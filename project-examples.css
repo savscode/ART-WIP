@@ -1,0 +1,226 @@
+/* ============================================================================
+   Gemensam stilmall för "Se projektexempel"-länken och exempel-rutan (modal)
+   som visas när man klickar på den, för alla parametrar (A–O).
+   ============================================================================ */
+
+/* Länken under varje parameter, t.ex. under "Kommentarer"-fältet */
+.example-link {
+    display: inline-block;
+    margin-top: 24px;
+    font-size: 0.85em;
+    font-family: 'CircularStd-Bold', Arial, sans-serif;
+    color: #000000;
+    text-decoration: underline;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+}
+
+.example-link:hover {
+    opacity: 0.6;
+}
+
+/* Bakgrund/overlay */
+.example-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.example-modal[hidden] {
+    display: none;
+}
+
+/* Rutan som täcker 80% av skärmen */
+.example-modal-box {
+    position: relative;
+    width: 80vw;
+    height: 80vh;
+    max-width: 1400px;
+    background: #ebebeb;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+/* Bilden fyller hela rutan, utfallande */
+.example-modal-image {
+    position: absolute;
+    inset: 0;
+}
+
+.example-modal-image img,
+.example-modal-image video {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Mörk skärm ovanpå bilden, bakom texten, så texten alltid syns bra */
+.example-modal-overlay {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: min(28%, 360px);
+    box-sizing: border-box;
+    background: #000000;
+    mix-blend-mode: multiply;
+    opacity: 0.6;
+}
+
+/* Textpanel ovanpå den mörka skärmen, högerställd precis som tidigare.
+   justify-content: flex-start (inte center) så rubriken alltid hamnar på
+   samma ställe oavsett hur lång brödtexten är. */
+.example-modal-content {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: min(28%, 360px);
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 16px;
+    padding: 220px 40px 90px;
+    font-family: 'CircularStd-Book', 'IvarText-Regular', Arial, sans-serif;
+    color: #ffffff;
+}
+
+.example-modal-counter,
+.example-modal-content h2,
+.example-modal-content p.example-modal-project {
+    flex-shrink: 0;
+}
+
+.example-modal-counter {
+    font-size: 0.85em;
+    letter-spacing: 0.05em;
+    color: #ffffff;
+    font-family: 'CircularStd-Bold', Arial, sans-serif;
+}
+
+.example-modal-content h2 {
+    margin: 0;
+    font-size: clamp(1.6em, 2.6vw, 2.4em);
+    font-family: 'CircularStd-Bold', Arial, sans-serif;
+    color: #ffffff;
+}
+
+.example-modal-content p {
+    margin: 0;
+    font-size: clamp(1em, 1.3vw, 1.2em);
+    line-height: 1.5;
+    color: #ffffff;
+    font-family: 'IvarText-Regular', Arial, sans-serif;
+}
+
+/* Brödtexten får ta det som blir över på höjden och skrollar internt om den
+   längsta texten ändå inte skulle få plats - då når den aldrig ner till
+   pilarna, oavsett hur lång den är. */
+.example-modal-content p#exampleText {
+    flex: 1 1 0;
+    min-height: 0;
+    overflow-y: auto;
+    padding-right: 6px;
+}
+
+.example-modal-content p.example-modal-project {
+    font-size: clamp(0.85em, 1.1vw, 1em);
+    font-family: 'CircularStd-Bold', Arial, sans-serif;
+    color: #ffffff;
+}
+
+/* Bläddringspilarna, förankrade i rutans nedre högra hörn */
+.example-modal-nav {
+    position: absolute;
+    bottom: 24px;
+    right: 24px;
+    display: flex;
+    gap: 12px;
+}
+
+.example-modal-nav button {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: none;
+    color: #ffffff;
+    cursor: pointer;
+    font-size: 1.2em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition: opacity 0.2s;
+}
+
+.example-modal-nav button:hover {
+    opacity: 0.65;
+}
+
+.example-modal-icon-down {
+    transform: rotate(180deg);
+}
+
+.example-modal-close {
+    position: absolute;
+    top: 16px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: none;
+    color: #ffffff;
+    cursor: pointer;
+    font-size: 1.6em;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+    transition: opacity 0.2s;
+}
+
+.example-modal-close:hover {
+    opacity: 0.65;
+}
+
+/* Mindre skärmar: textpanelen blir ett band längs nederkanten istället för en sidospalt */
+@media (max-width: 900px) {
+    .example-modal-box {
+        width: 92vw;
+        height: 88vh;
+    }
+
+    .example-modal-overlay,
+    .example-modal-content {
+        top: auto;
+        left: 0;
+        width: auto;
+    }
+
+    /* Overlayen har inget eget innehåll så den behöver en fast höjd (inte
+       bara max-height) för att faktiskt synas - annars blir den 0px hög. */
+    .example-modal-overlay {
+        height: 65%;
+    }
+
+    .example-modal-content {
+        max-height: 65%;
+        padding: 24px 24px 80px;
+        overflow-y: auto;
+    }
+
+    .example-modal-nav {
+        bottom: 16px;
+        right: 16px;
+    }
+}

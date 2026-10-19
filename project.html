@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projekt</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        @font-face {
+            font-family: 'CircularStd-Bold';
+            src: url('font/CircularStd-Bold.otf') format('opentype');
+        }
+
+        body {
+            margin: 20px;
+            padding: 20px;
+            font-family: 'CircularStd-Bold', sans-serif;
+            background-color: #ebebeb; /* Set background color to match the other pages */
+            -webkit-font-smoothing: antialiased; /* För Safari och Chrome */
+            -moz-osx-font-smoothing: grayscale; /* För Firefox på Mac */
+        }
+
+        #custom-contact-form {
+            max-width: 560px;
+            margin: 60px auto;
+            padding: 50px;
+            border: 3px solid #000;
+        }
+
+        #custom-contact-form h1 {
+            font-size: clamp(1.8em, 4vw, 2.6em);
+            font-family: 'CircularStd-Bold', Arial, sans-serif;
+            margin: 0 0 40px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 24px;
+        }
+
+        .form-group label {
+            font-size: 0.8em;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: #5f5f5f;
+            margin-bottom: 6px;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            font-size: 1.1em;
+            font-family: 'CircularStd-Book', 'IvarText-Regular', Arial, sans-serif;
+            padding: 6px 0;
+            border: none;
+            border-bottom: 2px solid #000;
+            background: none;
+            outline: none;
+        }
+
+        textarea {
+            resize: none;
+            height: 100px;
+        }
+
+                .arrow {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            font-size: 48px;
+            color: #000000;
+            transform: rotate(180deg); /* Rotate the arrow to point downwards */
+            opacity: 0; /* Initially hidden */
+            transition: opacity 1s ease-in-out; /* Smooth transition for opacity */
+        }
+
+        .arrow.show {
+            opacity: 1; /* Show the arrow */
+            animation: blink 1s infinite; /* Blinking animation */
+        }
+
+
+    </style>
+</head>
+<body>
+
+<div id="custom-contact-form">
+    <form id="contactForm">
+        <h1>Projektformulär</h1>
+        <div class="form-group">
+            <label for="datum">Datum</label>
+            <input type="date" id="datum" name="datum" required>
+        </div>
+        <div class="form-group">
+            <label for="projekt">Vilket projekt</label>
+            <input type="text" id="projekt" name="projekt" placeholder="Ange projekt" required>
+        </div>
+        <div class="form-group">
+            <label for="affarsomrade">Vilket affärsområde</label>
+            <input type="text" id="affarsomrade" name="affarsomrade" placeholder="Ange affärsområde" required>
+        </div>
+        <div class="form-group">
+            <label for="plats">Plats</label>
+            <input type="text" id="plats" name="plats" placeholder="Ange plats" required>
+        </div>
+        <div class="form-group">
+            <label for="skede">Vilket skede</label>
+            <input type="text" id="skede" name="skede" placeholder="Ange skede" required>
+        </div>
+        <div class="form-group">
+            <label for="bestallare">Beställare</label>
+            <input type="text" id="bestallare" name="bestallare" placeholder="Ange beställare" required>
+        </div>
+        <div class="form-group">
+            <label for="team">Team</label>
+            <input type="text" id="team" name="team" placeholder="Ange team" required>
+        </div>
+        <div class="form-group">
+            <label for="forfattare">Författare</label>
+            <input type="text" id="forfattare" name="forfattare" placeholder="Ange författare" required>
+        </div>
+
+    </form>
+</div>
+
+<i class="fa-solid fa-arrow-up arrow"></i>
+
+<script>
+    const arrow = document.querySelector('.arrow');
+
+    // Show the arrow when the page loads
+    window.addEventListener('load', () => {
+        arrow.classList.add('show');
+    });
+
+    // Add click event listener to the arrow to navigate to step1.html
+    arrow.addEventListener('click', () => {
+        document.body.classList.add('slide-up');
+        setTimeout(() => {
+            window.location.href = 'step1.html';
+        }, 1000); // Match the duration of the slide-up transition
+    });
+</script>
+
+</body>
+</html>

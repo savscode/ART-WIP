@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ART</title>
+  <style>
+    body { font-family: sans-serif; margin: 2rem; 
+      background-color: #ebebeb;
+    }
+    #form-wrapper {
+      position: relative;
+      min-height: 2000px; /* Set a minimum height */
+
+    }
+    #form-container {
+      position: relative;
+      min-height: 100%; /* Ensure it adjusts to content */
+      overflow: hidden;
+    }
+    .form-page {
+      position: absolute;
+      width: 100%;
+      transition: transform 0.5s ease, opacity 0.5s ease;
+      top: 0;
+      left: 0;
+      opacity: 1; /* Ensure both pages are visible during transition */
+      pointer-events: none;
+    }
+    .form-page.active {
+      pointer-events: auto;
+      position: relative;
+      height: auto; /* Allow the page to expand based on content */
+      width: auto; /* Allow the page to expand based on content */
+    }
+    .slide-up-in {
+      transform: translateY(100%);
+      animation: slideUpIn 0.5s forwards;
+    }
+    .slide-up-out {
+      animation: slideUpOut 0.5s forwards;
+    }
+    .slide-down-in {
+      transform: translateY(-100%);
+      animation: slideDownIn 0.5s forwards;
+    }
+    .slide-down-out {
+      animation: slideDownOut 0.5s forwards;
+    }
+    @keyframes slideUpIn {
+      to { transform: translateY(0); }
+    }
+    @keyframes slideUpOut {
+      to { transform: translateY(-100%); opacity: 0; }
+    }
+    @keyframes slideDownIn {
+      to { transform: translateY(0); }
+    }
+    @keyframes slideDownOut {
+      to { transform: translateY(100%); opacity: 0; }
+    }
+
+    nav {
+      position: fixed; /* Fix the position on the screen */
+      bottom: 20px; /* Position it near the bottom of the screen */
+      right: 60px; /* I linje med högerkanten på textfälten (de är 20px smalare än kolumnen) */
+      z-index: 1000; /* Ensure it stays in the foreground */
+      padding: 10px;
+    }
+
+    nav button {
+      margin: 0 2px; /* Add spacing between buttons */
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #000000;
+      font-size: 1.4em;
+    }
+
+    .nav-icon-down {
+      transform: rotate(180deg);
+    }
+
+    #doughnutChart {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      width: 200px;
+      height: 200px;
+    }
+
+    /* Export-symbol i övre högra hörnet. Visas bara på sista sidan
+       (sammanfattningen), där doughnutChart ändå alltid är dold - så de
+       krockar aldrig trots att de delar samma hörn. */
+    #exportBtn {
+      position: fixed;
+      top: 30px;
+      right: 40px;
+      background: none;
+      border: none;
+      color: #000000;
+      font-size: 1.8em;
+      cursor: pointer;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      transition: opacity 0.2s;
+    }
+
+    #exportBtn:hover {
+      opacity: 0.6;
+    }
+
+    @media (max-width: 900px) {
+      #doughnutChart {
+        width: 130px;
+        height: 130px;
+        top: 10px;
+        right: 10px;
+      }
+
+      nav {
+        right: 40px; /* Matchar de mindre marginalerna på step-sidorna under 900px + textfältens 20px-inset */
+      }
+
+      #exportBtn {
+        top: 15px;
+        right: 15px;
+        font-size: 1.4em;
+      }
+    }
+  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="project-examples.css">
+  <script src="https://cdn.jsdelivr.net/npm/echarts@6.1.0/dist/echarts.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="project-examples.js"></script>
+  <script src="./script.js" type="module"></script> <!-- Include the external JS file -->
+</head>
+<body>
+  <div id="form-wrapper">
+    <div id="form-container"></div>
+  </div>
+
+  <div id="doughnutChart"></div>
+
+  <button id="exportBtn" style="display: none;" onclick="exportPDF()" aria-label="Exportera som PDF">
+    <i class="fa-regular fa-file-lines"></i>
+  </button>
+
+  <nav>
+    <button id="navPrevBtn" onclick="prevPage()" style="background: none; border: none; cursor: pointer;" aria-label="Föregående sida">
+      <i class="fa-solid fa-arrow-up"></i></button>
+
+    <button id="navNextBtn" onclick="nextPage()" style="background: none; border: none; cursor: pointer;" aria-label="Nästa sida">
+      <i class="fa-solid fa-arrow-up nav-icon-down"></i></button>
+
+    <button id="resetBtn" style="display: none;" onclick="resetForm()">Reset</button> <!-- Hidden reset button -->
+  </nav>
+
+  <!-- Projektexempel-rutan: öppnas via "Se projektexempel"-länken på varje parameter -->
+  <div id="exampleModal" class="example-modal" hidden onclick="if (event.target === this) closeProjectExamples();">
+    <div class="example-modal-box">
+      <button class="example-modal-close" aria-label="Stäng" onclick="closeProjectExamples()"><i class="fa-regular fa-circle-xmark"></i></button>
+      <div class="example-modal-image">
+        <img id="exampleImage" src="" alt="">
+        <video id="exampleVideo" muted loop playsinline style="display: none;"></video>
+      </div>
+      <div class="example-modal-overlay"></div>
+      <div class="example-modal-content">
+        <div class="example-modal-counter" id="exampleCounter"></div>
+        <h2 id="exampleTitle"></h2>
+        <p class="example-modal-project">Projekt: <span id="exampleProject"></span></p>
+        <p id="exampleText"></p>
+        <div class="example-modal-nav">
+          <button onclick="prevProjectExample()" aria-label="Föregående exempel"><i class="fa-solid fa-arrow-up"></i></button>
+          <button onclick="nextProjectExample()" aria-label="Nästa exempel"><i class="fa-solid fa-arrow-up example-modal-icon-down"></i></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
