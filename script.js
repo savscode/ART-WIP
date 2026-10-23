@@ -1473,8 +1473,9 @@ function openProjectExamples(categoryId) {
     }
     currentExampleCategory = categoryId;
     currentExampleIndex = 0;
-    renderProjectExample();
+    // Visa rutan först - texten måste synas för att kunna mätas i fitExampleText()
     document.getElementById('exampleModal').hidden = false;
+    renderProjectExample();
     // Ladda de andra exemplen i bakgrunden så bläddringen går direkt
     preloadProjectExamples(categoryId);
 }
@@ -1508,10 +1509,12 @@ function renderProjectExample() {
     const examples = window.projectExamples[categoryId];
     const example = examples[index];
 
-    document.getElementById('exampleTitle').textContent = example.title;
-    document.getElementById('exampleProject').textContent = example.project;
-    document.getElementById('exampleText').textContent = example.text;
+    // Räkna ut textstorleken (samma för alla exempel) innan texten sätts -
+    // uträkningen skriver tillfälligt in varje exempels text i rutan
+    const scales = getUniformExampleScales();
+    setExampleTexts(example);
     document.getElementById('exampleCounter').textContent = `${index + 1} / ${examples.length}`;
+    applyExampleScales(scales);
 
     const imageEl = document.getElementById('exampleImage');
     const videoEl = document.getElementById('exampleVideo');
@@ -1551,6 +1554,104 @@ function renderProjectExample() {
         }
     });
 }
+
+// Textstorlek i exempelrutan på mindre skärmar, så inget behöver skrollas.
+// Storleken är SAMMA för alla exempel (så den inte hoppar när man bläddrar)
+// och bestäms av det exempel som behöver krympas mest:
+// 1) rubriken krymps tills dess längsta ord ryms på bredden,
+// 2) all text krymps stegvis (ner till 65%) tills brödtexten ryms på höjden.
+// På stora skärmar får allt plats direkt och storlekarna lämnas orörda.
+// Räknas ut en gång per fönsterstorlek (rutan måste vara synlig då).
+const EXAMPLE_TEXT_MIN_SCALE = 0.65;
+let exampleScalesCache = null; // { key: 'bredd x höjd', title, body }
+
+function exampleTextParts() {
+    const content = document.querySelector('.example-modal-content');
+    return {
+        content,
+        title: document.getElementById('exampleTitle'),
+        project: content.querySelector('.example-modal-project'),
+        text: document.getElementById('exampleText')
+    };
+}
+
+function setExampleTexts(example) {
+    const { title, project, text } = exampleTextParts();
+    title.textContent = example.title;
+    project.textContent = example.project;
+    text.textContent = example.text;
+}
+
+// Sätt textstorlekarna (title/body = andel av CSS:ens storlek, 1 = orörd)
+function applyExampleScales(scales) {
+    const { title, project, text } = exampleTextParts();
+    [title, project, text].forEach(el => { el.style.fontSize = ''; });
+    title.style.overflowWrap = '';
+    if (scales.title < 1) title.style.fontSize = `${parseFloat(getComputedStyle(title).fontSize) * scales.title}px`;
+    if (scales.body < 1) {
+        project.style.fontSize = `${parseFloat(getComputedStyle(project).fontSize) * scales.body}px`;
+        text.style.fontSize = `${parseFloat(getComputedStyle(text).fontSize) * scales.body}px`;
+    }
+    // Sista utväg om ett ord ändå inte ryms: bryt det hellre än att det sticker ut
+    if (title.scrollWidth > title.clientWidth) title.style.overflowWrap = 'anywhere';
+}
+
+// Hur mycket ETT exempel behöver krympas för att få plats
+function measureExampleScales(example) {
+    const { content, title, text } = exampleTextParts();
+    setExampleTexts(example);
+    applyExampleScales({ title: 1, body: 1 });
+
+    // 1) Rubrikens längsta ord måste rymmas på bredden
+    const baseTitle = parseFloat(getComputedStyle(title).fontSize);
+    let titleSize = baseTitle;
+    while (title.scrollWidth > title.clientWidth && titleSize > baseTitle * EXAMPLE_TEXT_MIN_SCALE) {
+        titleSize -= 1;
+        title.style.fontSize = `${titleSize}px`;
+    }
+    const titleScale = titleSize / baseTitle;
+
+    // 2) Brödtexten måste rymmas på höjden (och hela panelen, på mobil)
+    const overflows = () =>
+        text.scrollHeight > text.clientHeight + 1 || content.scrollHeight > content.clientHeight + 1;
+    let body = 1;
+    while (overflows() && body > EXAMPLE_TEXT_MIN_SCALE) {
+        body = Math.max(EXAMPLE_TEXT_MIN_SCALE, body - 0.05);
+        applyExampleScales({ title: Math.min(body, titleScale), body });
+    }
+    return { title: Math.min(body, titleScale), body };
+}
+
+// Den gemensamma storleken: det minsta som något exempel behöver
+function getUniformExampleScales() {
+    const key = `${window.innerWidth}x${window.innerHeight}`;
+    if (exampleScalesCache && exampleScalesCache.key === key) return exampleScalesCache;
+
+    let title = 1;
+    let body = 1;
+    Object.values(window.projectExamples).forEach(examples => {
+        examples.forEach(example => {
+            const s = measureExampleScales(example);
+            title = Math.min(title, s.title);
+            body = Math.min(body, s.body);
+        });
+    });
+    exampleScalesCache = { key, title, body };
+    return exampleScalesCache;
+}
+
+// Räkna om när fönstret ändrar storlek medan rutan är öppen
+let exampleFitFrame = null;
+window.addEventListener('resize', () => {
+    if (currentExampleCategory === null) return;
+    cancelAnimationFrame(exampleFitFrame);
+    exampleFitFrame = requestAnimationFrame(() => {
+        const example = window.projectExamples[currentExampleCategory][currentExampleIndex];
+        const scales = getUniformExampleScales();
+        setExampleTexts(example);
+        applyExampleScales(scales);
+    });
+});
 
 // Förladda alla exempel för en kategori (anropas när rutan öppnas och när
 // man för musen över "Se projektexempel")

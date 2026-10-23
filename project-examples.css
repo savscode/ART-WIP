@@ -96,7 +96,9 @@
     flex-direction: column;
     justify-content: flex-start;
     gap: 16px;
-    padding: 220px 40px 90px;
+    /* Luften ovanför rubriken krymper på låga skärmar (20vh = 1/4 av rutans
+       höjd på 80vh) så brödtexten får plats - 220px som mest, som tidigare */
+    padding: min(220px, 20vh) 40px 90px;
     font-family: 'CircularStd-Book', 'IvarText-Regular', Arial, sans-serif;
     color: #ffffff;
 }
@@ -129,8 +131,9 @@
     font-family: 'IvarText-Regular', Arial, sans-serif;
 }
 
-/* Brödtexten får ta det som blir över på höjden och skrollar internt om den
-   längsta texten ändå inte skulle få plats - då når den aldrig ner till
+/* Brödtexten får ta det som blir över på höjden. fitExampleText() i script.js
+   krymper texten tills den får plats; skrollen nedan är bara en sista utväg
+   om den ändå inte ryms i minsta storleken - då når den aldrig ner till
    pilarna, oavsett hur lång den är. */
 .example-modal-content p#exampleText {
     flex: 1 1 0;
@@ -224,6 +227,13 @@
         max-height: 65%;
         padding: 24px 24px 80px;
         overflow-y: auto;
+    }
+
+    /* Här har panelen ingen fast höjd, så brödtexten tar sin naturliga höjd
+       och det är panelen som mäts (och skrollar som sista utväg) */
+    .example-modal-content p#exampleText {
+        flex: none;
+        overflow: visible;
     }
 
     .example-modal-nav {
