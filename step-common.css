@@ -188,6 +188,14 @@ body {
     }
 }
 
+/* Endast mobil: på steg 1-3 (sidorna med spalter) linjeras rubrik och ingress
+   med spalternas text nedanför (container 10px + column 20px = 30px) */
+@media (max-width: 600px) {
+    .form-page:has(.container) .header {
+        padding-left: 30px;
+    }
+}
+
 /* Tydlig markering när man navigerar med tangentbordet (Tab) */
 .number-options span:focus-visible,
 .toggle-button:focus-visible,

@@ -40,6 +40,24 @@ function selectNumber(element, categoryId) {
     // Always update chart after value changes
     updateChart();
     saveInputs();
+    flashProgressChart();
+}
+
+// Endast mobil: samma gräns som @media (max-width: 600px) i ART.html
+const mobileQuery = window.matchMedia('(max-width: 600px)');
+
+// Mobil: cirkeldiagrammet är dolt och blinkar fram över hela skärmen i ett
+// par sekunder när man väljer 1-5 (utseendet styrs av #doughnutChart.flash)
+const PROGRESS_FLASH_MS = 2000;
+let progressFlashTimer = null;
+
+function flashProgressChart() {
+    if (!mobileQuery.matches) return;
+    const chartEl = document.getElementById('doughnutChart');
+    if (!chartEl) return;
+    chartEl.classList.add('flash');
+    clearTimeout(progressFlashTimer);
+    progressFlashTimer = setTimeout(() => chartEl.classList.remove('flash'), PROGRESS_FLASH_MS);
 }
 
 // Make selectNumber globally accessible
@@ -130,6 +148,10 @@ async function loadPage(index, direction = 'forward', preloadedHtml = null) {
     // Annars ligger den osynlig en halv sekund: inaktiva sidor är absolut
     // positionerade och klipps bort av #form-container som då har höjden 0.
     if (!oldPage) newDiv.classList.add('active');
+
+    // Mobil: en ny sida börjar alltid högst upp (annars kan man hamna mitt
+    // på sidan om man hade skrollat ner på förra sidan)
+    if (oldPage && mobileQuery.matches) window.scrollTo(0, 0);
 
     container.appendChild(newDiv);
 
@@ -575,7 +597,7 @@ function updateProgressChart(container = document, forceReset = false) {
                     show: true,
                     position: 'center',
                     formatter: `${percentage}%`,
-                    fontSize: 20,
+                    fontSize: mobileQuery.matches ? 44 : 20, // Större i den stora mobil-ringen
                     fontWeight: 'bold'
                 },
                 labelLine: { show: false },

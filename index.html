@@ -72,6 +72,24 @@
       max-width: min(60%, 700px);
     }
 
+    /* Samma som step-common.css under 900px: body margin 10px + padding 10px */
+    @media (max-width: 900px) {
+      .next-page-preview {
+        padding: 20px;
+      }
+
+      .next-page-preview .header p {
+        max-width: 100%;
+      }
+    }
+
+    /* Mobil: plats för cirkelmenyn ovanför rubriken i ART.html (10 + 60px) */
+    @media (max-width: 600px) {
+      .next-page-preview {
+        padding-top: 70px;
+      }
+    }
+
     body, html {
       margin: 0;
       padding: 0;
