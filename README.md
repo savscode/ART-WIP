@@ -24,6 +24,11 @@ Om Windows visar "Windows skyddade datorn": klicka på "Mer information" och sed
 - Siffrorna 1–5, "läs mer"-pilen och "Se projektexempel" går att använda med tangentbordet (Tab + Enter).
 - Felmeddelanden och varningar är översatta till svenska.
 - Diagrambiblioteket (ECharts) är låst till en fast version.
+- Övergången från startsidan: hållbarhetsvisionen glider upp från skärmens nederkant i samma rörelse som startsidan, utan blinkning.
+- Snabbnavigering i nederkant på alla sidor (utom startsidan): A, R, T, projektformulär, hållbarhetsvision och resultat.
+- Cirkeldiagrammet på steg 1–3 är högerjusterat med textfälten.
+- Projektformuläret har en bock som sparar och går vidare till steg 1.
+- PDF-ikonen på resultatsidan är utbytt.
 
 ## Att dubbelkolla
 

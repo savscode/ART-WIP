@@ -47,6 +47,20 @@
     .slide-down-out {
       animation: slideDownOut 0.5s forwards;
     }
+    /* Första sidan glider upp från skärmens nederkant (inte från textens
+       nederkant) - samma längd och rörelse som uppglidningen på startsidan */
+    .intro-slide {
+      animation: introSlide 1.8s cubic-bezier(0.45, 0, 0.15, 1) both;
+    }
+    @keyframes introSlide {
+      from { transform: translateY(100vh); }
+      to { transform: translateY(0); }
+    }
+    /* Under introt får sidan synas utanför #form-container (annars klipps den
+       av vid textens nederkant) */
+    #form-container.intro-active {
+      overflow: visible;
+    }
     @keyframes slideUpIn {
       to { transform: translateY(0); }
     }
@@ -83,10 +97,14 @@
       transform: rotate(180deg);
     }
 
+    /* Ringen fyller bara 70% av rutan (radius 70% i script.js), så rutan
+       placeras så att RINGENS högerkant linjerar med textfälten:
+       textfälten slutar 80px från högerkanten (body 20+20, container 20,
+       column 20) och ringen har 30px luft i rutan (200px * 0.15) -> 50px */
     #doughnutChart {
       position: fixed;
       top: 20px;
-      right: 20px;
+      right: 50px;
       width: 200px;
       height: 200px;
     }
@@ -113,12 +131,99 @@
       opacity: 0.6;
     }
 
+    /* Snabbnavigering: fem svarta cirklar i nederkant (A, R, T, projektinfo,
+       hållbarhetsvision). Centrerade i höjd med pilarna i nav ovan: pilknapparna
+       är 36px höga med mitten 48px från nederkant (bottom 20 + padding 10 + 18). */
+    .quick-nav {
+      position: fixed;
+      bottom: 30px; /* 48px - halva cirkeln (18px) */
+      display: flex;
+      gap: 8px;
+      z-index: 1000;
+      /* Tona in mjukt när sidan laddas, så de inte poppar upp i slutet av
+         uppglidningen från startsidan (de finns inte med där) */
+      animation: quickNavFadeIn 0.6s ease 0.1s both;
+    }
+
+    @keyframes quickNavFadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .quick-nav button {
+      width: 36px;
+      height: 36px;
+      padding: 0;
+      border: none;
+      border-radius: 50%;
+      background: #d7d7d7; /* Samma mörkare grå som triangeln på startsidan */
+      color: #ffffff;
+      font-family: 'CircularStd-Bold', Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .quick-nav button:hover {
+      background: #c4c4c4; /* Lite mörkare vid hover */
+    }
+
+    .quick-nav button:focus-visible {
+      outline: 2px solid #000000;
+      outline-offset: 3px;
+    }
+
+    /* Smalt fönster (spalterna radbryts): alla fem i en rad till vänster om
+       pilarna. nav slutar 60px från kanten och är 100px bred (2 x 36px knappar
+       + 2 x 2px marginal per knapp + 2 x 10px padding), plus 8px mellanrum.
+       A R T-gruppen ligger till vänster om info-gruppen (3 x 36px + 2 x 8px) + 8px. */
+    .quick-nav-art {
+      right: calc(60px + 100px + 8px + 3 * 36px + 2 * 8px + 8px);
+    }
+
+    .quick-nav-info {
+      right: calc(60px + 100px + 8px);
+    }
+
+    /* Brett fönster där alla fem spalterna på steg 1-3 ryms på en rad
+       (5 x 250px + 4 x 30px mellanrum + 120px marginaler = 1490px, plus
+       marginal för rullningslisten). Då linjeras cirklarna mot spalterna:
+       spaltbredd c = (100% - 240px) / 5 = 20% - 48px, där 100% = fönstret.
+       A R T: högerkant mot spalt 4:s text = 60 + c + 30 + 20 = 20% + 62px
+       från höger. Info-gruppen: vänsterkant mot spalt 5:s text
+       = 60 + c - 20 = 20% - 8px från höger, dvs left: 80% + 8px. */
+    @media (min-width: 1510px) {
+      .quick-nav-art {
+        right: calc(20% + 62px);
+      }
+
+      .quick-nav-info {
+        right: auto;
+        left: calc(80% + 8px);
+      }
+    }
+
     @media (max-width: 900px) {
+      /* nav sitter 40px från kanten här istället för 60px */
+      .quick-nav-art {
+        right: calc(40px + 100px + 8px + 3 * 36px + 2 * 8px + 8px);
+      }
+
+      .quick-nav-info {
+        right: calc(40px + 100px + 8px);
+      }
+
+      /* Under 900px slutar textfälten 50px från kanten (body 10+10,
+         container 10, column 20) och ringen har ca 20px luft (130px * 0.15) */
       #doughnutChart {
         width: 130px;
         height: 130px;
         top: 10px;
-        right: 10px;
+        right: 30px;
       }
 
       nav {
@@ -132,13 +237,24 @@
       }
     }
   </style>
+  <!-- Börja ladda typsnitten direkt, så texten inte blinkar till (osynlig
+       medan typsnittet laddas) när man kommer från startsidan -->
+  <link rel="preload" href="font/CircularStd-Bold.otf" as="font" type="font/otf" crossorigin>
+  <link rel="preload" href="font/CircularStd-Book.otf" as="font" type="font/otf" crossorigin>
+  <link rel="preload" href="font/IvarText-Regular.otf" as="font" type="font/otf" crossorigin>
+  <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/webfonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   <link rel="stylesheet" href="project-examples.css">
+  <!-- Laddas även av varje undersida, men här direkt så marginaler och typsnitt
+       är rätt från första bildrutan (viktigt för övergången från startsidan) -->
+  <link rel="stylesheet" href="step-common.css">
   <script src="https://cdn.jsdelivr.net/npm/echarts@6.1.0/dist/echarts.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="project-examples.js"></script>
-  <script src="./script.js" type="module"></script> <!-- Include the external JS file -->
+  <!-- blocking="render": inget ritas förrän skriptet har lagt in första sidan,
+       så man aldrig ser en tom sida en bildruta -->
+  <script src="./script.js" type="module" blocking="render"></script> <!-- Include the external JS file -->
 </head>
 <body>
   <div id="form-wrapper">
@@ -148,14 +264,28 @@
   <div id="doughnutChart"></div>
 
   <button id="exportBtn" style="display: none;" onclick="exportPDF()" aria-label="Exportera som PDF">
-    <i class="fa-regular fa-file-lines"></i>
+    <i class="fa-solid fa-file-arrow-down"></i>
   </button>
 
+  <!-- Snabbnavigering till A, R, T, projektinformation och hållbarhetsvision.
+       Siffran i goToPage() är sidans plats i pages-listan i script.js. -->
+  <div class="quick-nav quick-nav-art">
+    <button onclick="goToPage(2)" aria-label="A: Användning" title="A: Användning">A</button>
+    <button onclick="goToPage(3)" aria-label="R: Resurser" title="R: Resurser">R</button>
+    <button onclick="goToPage(4)" aria-label="T: Tid" title="T: Tid">T</button>
+  </div>
+  <div class="quick-nav quick-nav-info">
+    <button onclick="goToPage(1)" aria-label="Projektinformation" title="Projektinformation"><i class="fa-regular fa-file-lines"></i></button>
+    <button onclick="goToPage(0)" aria-label="Hållbarhetsvision" title="Hållbarhetsvision"><i class="fa-solid fa-info"></i></button>
+    <button onclick="goToPage(5)" aria-label="Resultat" title="Resultat"><i class="fa-solid fa-chart-pie"></i></button>
+  </div>
+
   <nav>
-    <button id="navPrevBtn" onclick="prevPage()" style="background: none; border: none; cursor: pointer;" aria-label="Föregående sida">
+    <!-- Pilarna är dolda från start - loadPage() visar dem på de sidor där de ska synas -->
+    <button id="navPrevBtn" onclick="prevPage()" style="display: none; background: none; border: none; cursor: pointer;" aria-label="Föregående sida">
       <i class="fa-solid fa-arrow-up"></i></button>
 
-    <button id="navNextBtn" onclick="nextPage()" style="background: none; border: none; cursor: pointer;" aria-label="Nästa sida">
+    <button id="navNextBtn" onclick="nextPage()" style="display: none; background: none; border: none; cursor: pointer;" aria-label="Nästa sida">
       <i class="fa-solid fa-arrow-up nav-icon-down"></i></button>
 
     <button id="resetBtn" style="display: none;" onclick="resetForm()">Reset</button> <!-- Hidden reset button -->

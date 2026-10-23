@@ -45,6 +45,8 @@ while ($listener.IsListening) {
             $bytes = [IO.File]::ReadAllBytes($file)
             $ext = [IO.Path]::GetExtension($file).ToLower()
             if ($types.ContainsKey($ext)) { $ctx.Response.ContentType = $types[$ext] }
+            # Ingen cache - så man alltid ser senaste versionen när man testar
+            $ctx.Response.Headers.Add('Cache-Control', 'no-cache')
             $ctx.Response.ContentLength64 = $bytes.Length
             $ctx.Response.OutputStream.Write($bytes, 0, $bytes.Length)
         } else {

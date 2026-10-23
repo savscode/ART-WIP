@@ -4,10 +4,72 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ART</title>
+  <!-- Förladda nästa sida medan startanimationen spelas, så hållbarhetsvisionen
+       visas direkt när sidan byts (måste matcha filerna som ART.html använder) -->
+  <link rel="prefetch" href="ART.html">
+  <link rel="prefetch" href="script.js">
+  <link rel="prefetch" href="project-examples.js">
+  <link rel="prefetch" href="project-examples.css">
+  <link rel="prefetch" href="step-common.css">
+  <link rel="prefetch" href="vision.html">
+  <link rel="prefetch" href="font/CircularStd-Bold.otf">
+  <link rel="prefetch" href="font/CircularStd-Book.otf">
+  <link rel="prefetch" href="font/IvarText-Regular.otf">
+  <link rel="prefetch" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="prefetch" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/webfonts/fa-solid-900.woff2">
+  <link rel="prefetch" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/webfonts/fa-regular-400.woff2">
+  <link rel="prefetch" href="https://cdn.jsdelivr.net/npm/echarts@6.1.0/dist/echarts.min.js">
+  <link rel="prefetch" href="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js">
+  <link rel="prefetch" href="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js">
+  <!-- Behövs för pilen på "Testa ditt projekt" i förhandsvisningen nedan -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   <style>
     @font-face {
       font-family: 'CircularStd-Bold';
       src: url('font/CircularStd-Bold.otf') format('opentype');
+    }
+
+    @font-face {
+      font-family: 'IvarText-Regular';
+      src: url('font/IvarText-Regular.otf') format('opentype');
+    }
+
+    /* Hållbarhetsvisionen ligger direkt under startsidan (utanför bild) och
+       följer med när sidan glider upp - som om man rullar fram nästa sida.
+       Måste ligga exakt där texten hamnar i ART.html: body där har
+       margin 20px + padding 20px (step-common.css), och reglerna för .header
+       nedan är kopior av dem i step-common.css. Ändras de där, ändra här. */
+    .next-page-preview {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      width: calc(100% - var(--scrollbar-width, 0px)); /* ART.html har rullningslist */
+      height: 100%;
+      box-sizing: border-box;
+      padding: 40px;
+      text-align: left;
+      background-color: #ebebeb; /* Samma som ART.html - täcker trianglarna som når utanför bild */
+      z-index: 3;
+      pointer-events: none;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .next-page-preview .header {
+      padding: 20px 20px 20px 40px;
+    }
+
+    .next-page-preview .header h1 {
+      font-size: clamp(2.2em, 5vw, 4em);
+      margin: 0;
+      font-family: 'CircularStd-Bold', Arial, sans-serif;
+    }
+
+    .next-page-preview .header p {
+      font-size: clamp(1em, 1.6vw, 1.3em);
+      color: #000000;
+      font-family: 'IvarText-Regular', Arial, sans-serif;
+      max-width: min(60%, 700px);
     }
 
     body, html {
@@ -21,7 +83,16 @@
       align-items: center;
       font-family: 'CircularStd-Bold', sans-serif;
       background-color: #ebebeb; /* Set background color to match the lower field */
-      transition: transform 1s ease-in-out; /* Add transition for page slide up */
+      /* Uppglidningen: lugn rörelse som bromsar in mjukt när visionstexten
+         når sin plats. Längden (1.8s) måste matcha SLIDE_UP_MS i skriptet nedan. */
+      transition: transform 1.8s cubic-bezier(0.45, 0, 0.15, 1);
+    }
+
+    /* body får inte klippa sitt innehåll: när .slide-up ger body en transform
+       skulle overflow:hidden annars klippa bort visionstexten som ligger under
+       sidan. Fönstret klipps ändå, via overflow:hidden på html. */
+    body {
+      overflow: visible;
     }
 
     .slide-up {
@@ -119,6 +190,7 @@
     <span class="T">T</span>
   </div>
   <div class="start-hint">Klicka för att börja</div>
+  <div class="next-page-preview" aria-hidden="true"></div>
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -136,6 +208,30 @@
         // Startsidan = ny omgång: töm eventuella svar från en tidigare omgång i samma flik
         sessionStorage.clear();
 
+        // Hämta hållbarhetsvisionen (vision.html) och lägg den under startsidan,
+        // så texten finns på plats när sidan glider upp
+        const preview = document.querySelector('.next-page-preview');
+        fetch('vision.html')
+            .then(res => res.ok ? res.text() : '')
+            .then(html => {
+                // Spara texten så ART.html kan visa den direkt, utan att hämta den igen
+                if (html) sessionStorage.setItem('visionHtml', html);
+                const doc = new DOMParser().parseFromString(html, 'text/html');
+                // Ta med vision.html:s egna stilar (t.ex. knappen) och själva texten
+                doc.querySelectorAll('head style, body > *').forEach(el => preview.appendChild(el));
+            })
+            .catch(() => {});
+
+        // ART.html har en rullningslist som gör sidan smalare - mät den så
+        // förhandsvisningen bryter raderna på exakt samma ställen
+        const probe = document.createElement('div');
+        probe.style.cssText = 'position:absolute;top:-9999px;width:100px;height:100px;overflow:scroll;';
+        document.body.appendChild(probe);
+        document.documentElement.style.setProperty('--scrollbar-width', `${probe.offsetWidth - probe.clientWidth}px`);
+        probe.remove();
+
+        const SLIDE_UP_MS = 1800; // Måste matcha transition-längden på body i CSS:en ovan
+
         const startHint = document.querySelector('.start-hint');
         let started = false;
 
@@ -152,8 +248,11 @@
             setTimeout(() => {
                 document.body.classList.add('slide-up');
                 setTimeout(() => {
+                    // Säg till ART.html att visionen redan ligger på plats, så den
+                    // inte glider in en gång till
+                    sessionStorage.setItem('fromSplash', '1');
                     window.location.href = 'ART.html';
-                }, 1000); // Match the duration of the slide-up transition
+                }, SLIDE_UP_MS); // Match the duration of the slide-up transition
             }, 3000); // Match the duration of the rotation animation
         };
 

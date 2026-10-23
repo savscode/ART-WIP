@@ -77,7 +77,9 @@ function limitTextareaRows() {
     });
 }
 
-async function loadPage(index, direction = 'forward') {
+// preloadedHtml: sidans HTML om den redan finns (startsidan skickar med
+// visionstexten), så sidan kan läggas in direkt utan att vänta på fetch
+async function loadPage(index, direction = 'forward', preloadedHtml = null) {
   if (isTransitioning) return; // Prevent multiple transitions
   isTransitioning = true;
 
@@ -85,19 +87,34 @@ async function loadPage(index, direction = 'forward') {
   const oldPage = container.firstElementChild;
 
   try {
-    const res = await fetch(pages[index]);
-    if (!res.ok) throw new Error(`Failed to load ${pages[index]}`);
-    const html = await res.text();
+    let html = preloadedHtml;
+    if (!html) {
+      const res = await fetch(pages[index]);
+      if (!res.ok) throw new Error(`Failed to load ${pages[index]}`);
+      html = await res.text();
+    }
 
     const newDiv = document.createElement('div');
     newDiv.classList.add('form-page');
     newDiv.innerHTML = html;
 
-    if (direction === 'forward') {
+    if (direction === 'none') {
+      // Ingen animation - sidan visas direkt på plats (används när man kommer
+      // från startsidan, där texten redan har glidit upp)
+    } else if (direction === 'forward' && !oldPage) {
+      // Första sidan: glid upp från skärmens nederkant
+      newDiv.classList.add('intro-slide');
+      container.classList.add('intro-active');
+      newDiv.addEventListener('animationend', () => {
+        newDiv.classList.remove('intro-slide');
+        container.classList.remove('intro-active');
+      }, { once: true });
+    } else if (direction === 'forward') {
+      container.classList.remove('intro-active'); // Om man bläddrar vidare mitt i introt
       newDiv.classList.add('slide-up-in');
       if (oldPage) {
         oldPage.classList.remove('active'); // Ensure old page is not active
-        oldPage.classList.remove('slide-down-in', 'slide-up-in'); // Remove any lingering classes
+        oldPage.classList.remove('slide-down-in', 'slide-up-in', 'intro-slide'); // Remove any lingering classes
         oldPage.classList.add('slide-up-out'); // Apply slide-up-out to current page
       }
     } else {
@@ -108,6 +125,11 @@ async function loadPage(index, direction = 'forward') {
         oldPage.classList.add('slide-down-out'); // Apply slide-down-out to current page
       }
     }
+
+    // Första sidan (ingen gammal sida att glida undan) markeras aktiv direkt.
+    // Annars ligger den osynlig en halv sekund: inaktiva sidor är absolut
+    // positionerade och klipps bort av #form-container som då har höjden 0.
+    if (!oldPage) newDiv.classList.add('active');
 
     container.appendChild(newDiv);
 
@@ -171,6 +193,15 @@ function prevPage() {
   saveInputs();
   if (currentPage > 0) loadPage(currentPage - 1, 'backward');
 }
+
+// Snabbnavigeringen (cirklarna i nederkant): hoppa direkt till en sida.
+// Glider uppåt om sidan ligger längre fram, nedåt om den ligger bakåt.
+function goToPage(index) {
+  if (index === currentPage) return;
+  saveInputs();
+  loadPage(index, index > currentPage ? 'forward' : 'backward');
+}
+window.goToPage = goToPage;
 
 function updateSummaryChart() {
     // Only create the chart if we're on the summary page
@@ -1394,10 +1425,19 @@ function positionChartLabels(container, categories) {
 // Svaren ligger i sessionStorage: de finns kvar om man laddar om sidan,
 // men töms när fliken stängs. Startsidan (index.html) tömmer dem också,
 // så den som börjar från början alltid får ett tomt formulär.
-window.onload = () => {
-    loadPage(0); // Load the first page
-    limitTextareaRows(); // Apply textarea row limiting on initial load
-};
+//
+// Första sidan laddas direkt (det här är en module-script som körs när HTML:en
+// är färdigläst) istället för på window.onload, som väntar på att alla
+// typsnitt, ikoner och bilder ska bli klara först.
+//
+// Kommer man från startsidan har visionstexten redan glidit upp på plats
+// där, så då visas den direkt utan egen animation.
+const cameFromSplash = sessionStorage.getItem('fromSplash') === '1';
+const splashVisionHtml = cameFromSplash ? sessionStorage.getItem('visionHtml') : null;
+sessionStorage.removeItem('fromSplash');
+sessionStorage.removeItem('visionHtml');
+loadPage(0, cameFromSplash ? 'none' : 'forward', splashVisionHtml); // Load the first page
+limitTextareaRows(); // Apply textarea row limiting on initial load
 
 // Attach functions to the global window object to ensure they are accessible from the HTML
 window.nextPage = nextPage;
