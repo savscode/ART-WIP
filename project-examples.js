@@ -13,7 +13,7 @@
 // t.ex. "Nyttjande-1.jpg", "Flexibilitet-2.mp4", "Resiliens-3.png"
 // Numret (1, 2 eller 3) avgör vilket av de tre exemplen det blir.
 // Filändelsen spelar ingen roll - systemet letar automatiskt efter
-// .jpg/.jpeg/.png (bild) och .mp4/.mov (film) och visar det som finns.
+// .jpg/.jpeg/.png/.gif (bild) och .mp4/.mov (film) och visar det som finns.
 // Saknas filen helt visas en grå platshållarbild istället.
 //
 // Namnen nedan (t.ex. categoryA -> "Nyttjande") måste matcha filnamnen exakt.

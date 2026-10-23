@@ -75,7 +75,7 @@
     top: 0;
     right: 0;
     bottom: 0;
-    width: min(28%, 360px);
+    width: clamp(300px, 28%, 360px); /* Samma bredd som textpanelen nedan */
     box-sizing: border-box;
     background: #000000;
     mix-blend-mode: multiply;
@@ -90,7 +90,9 @@
     top: 0;
     right: 0;
     bottom: 0;
-    width: min(28%, 360px);
+    /* Minst 300px bred, så långa ord i rubriken oftast får plats även på
+       medelstora skärmar (28% av rutan blir annars väldigt smalt där) */
+    width: clamp(300px, 28%, 360px);
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
@@ -98,7 +100,7 @@
     gap: 16px;
     /* Luften ovanför rubriken krymper på låga skärmar (20vh = 1/4 av rutans
        höjd på 80vh) så brödtexten får plats - 220px som mest, som tidigare */
-    padding: min(220px, 20vh) 40px 90px;
+    padding: min(220px, 20vh) clamp(24px, 2.5vw, 40px) 90px;
     font-family: 'CircularStd-Book', 'IvarText-Regular', Arial, sans-serif;
     color: #ffffff;
 }

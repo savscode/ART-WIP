@@ -1457,7 +1457,7 @@ window.exportPDF = exportPDF;
 // allt eftersom som att ha alla på plats direkt.
 // ----------------------------------------------------------------------------
 const EXAMPLE_MEDIA_FOLDER = 'projektexempel/';
-const EXAMPLE_IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png'];
+const EXAMPLE_IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif'];
 const EXAMPLE_VIDEO_EXTENSIONS = ['mp4', 'mov'];
 const EXAMPLE_PLACEHOLDER_MEDIA = 'Symbols/placeholder-projekt.svg';
 const exampleMediaCache = {};
@@ -1592,8 +1592,42 @@ function applyExampleScales(scales) {
         project.style.fontSize = `${parseFloat(getComputedStyle(project).fontSize) * scales.body}px`;
         text.style.fontSize = `${parseFloat(getComputedStyle(text).fontSize) * scales.body}px`;
     }
-    // Sista utväg om ett ord ändå inte ryms: bryt det hellre än att det sticker ut
-    if (title.scrollWidth > title.clientWidth) title.style.overflowWrap = 'anywhere';
+    // Om ett ord ändå inte ryms: avstava det med bindestreck vid en stavelsegräns.
+    // Hjälper inte det heller bryts ordet var som helst, hellre än att det sticker ut.
+    title.textContent = title.textContent.replace(/­/g, '');
+    if (title.scrollWidth > title.clientWidth) {
+        title.textContent = hyphenateSwedish(title.textContent);
+        if (title.scrollWidth > title.clientWidth) title.style.overflowWrap = 'anywhere';
+    }
+}
+
+// Lägg in mjuka bindestreck (­) vid troliga stavelsegränser i långa ord.
+// Webbläsaren bryter bara vid dem när ordet inte får plats, och visar då ett
+// bindestreck. Enkel svensk tumregel: bryt före sista konsonanten före en
+// vokal (anpass-nings-bar), men håll ihop konsonant + r/l (indus-tri-bygg).
+// Minst 3 bokstäver på var sida om brytningen.
+const SWEDISH_VOWELS = 'aeiouyåäöé';
+const SWEDISH_ONSETS = ['br', 'dr', 'fr', 'gr', 'kr', 'pr', 'tr', 'vr', 'bl', 'fl', 'gl', 'kl', 'pl', 'sl'];
+
+function hyphenateSwedish(text) {
+    return text.replace(/[A-Za-zÅÄÖåäöÉé]{7,}/g, word => {
+        const lower = word.toLowerCase();
+        const isVowel = i => SWEDISH_VOWELS.includes(lower[i]);
+        const breaks = [];
+        for (let i = 1; i < word.length; i++) {
+            // i = första vokalen i en ny stavelse; leta bakåt efter konsonanterna före
+            if (!isVowel(i) || isVowel(i - 1)) continue;
+            let start = i - 1;
+            while (start > 0 && !isVowel(start - 1)) start--;
+            if (start === 0) continue; // Inga vokaler före - ordets början
+            let cut = i - 1; // Före sista konsonanten
+            if (i - start >= 2 && SWEDISH_ONSETS.includes(lower.slice(i - 2, i))) cut = i - 2;
+            if (cut >= 3 && word.length - cut >= 3) breaks.push(cut);
+        }
+        let result = word;
+        breaks.reverse().forEach(pos => { result = result.slice(0, pos) + '­' + result.slice(pos); });
+        return result;
+    });
 }
 
 // Hur mycket ETT exempel behöver krympas för att få plats
@@ -1601,6 +1635,9 @@ function measureExampleScales(example) {
     const { content, title, text } = exampleTextParts();
     setExampleTexts(example);
     applyExampleScales({ title: 1, body: 1 });
+    // Mät rubriken utan avstavning - krympning ska alltid provas först
+    title.textContent = example.title;
+    title.style.overflowWrap = '';
 
     // 1) Rubrikens längsta ord måste rymmas på bredden
     const baseTitle = parseFloat(getComputedStyle(title).fontSize);
