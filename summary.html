@@ -94,6 +94,43 @@
             resize: none;
             outline: none;
         }
+
+        /* ===== Endast mobil (upp till 600px bred) =====
+           Ordning uppifrån: rubrik + underrubrik, rosen (så stor som möjligt,
+           centrerad), sedan resten av texten vänsterställd som rubriken.
+           Rosen ligger i vanligt flöde istället för fast i bakgrunden. */
+        @media (max-width: 600px) {
+            .form-page:has(.chart-container) {
+                display: flex;
+                flex-direction: column;
+            }
+
+            .form-page:has(.chart-container) .header { order: 1; }
+            .form-page:has(.chart-container) .chart-container { order: 2; }
+            .form-page:has(.chart-container) .top-categories { order: 3; }
+
+            /* Kvadrat lika bred som sidan. Etiketterna (#labels-container) skalas
+               med höjden precis som på datorn, så de hamnar rätt runt rosen. */
+            .chart-container {
+                position: relative;
+                width: 100%;
+                height: auto;
+                aspect-ratio: 1;
+                z-index: auto;
+                transform: none;
+                background-color: transparent;
+                overflow: hidden; /* Etikettlagret är större än rutan - ingen sidledsskroll */
+                margin-top: 10px;
+            }
+
+            .top-categories {
+                margin-top: 0;
+            }
+
+            .top-categories h2:first-child {
+                margin-top: 10px;
+            }
+        }
     </style>
 </head>
 <body class="summary-page">

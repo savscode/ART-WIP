@@ -48,7 +48,7 @@ const mobileQuery = window.matchMedia('(max-width: 600px)');
 
 // Mobil: cirkeldiagrammet är dolt och blinkar fram över hela skärmen i ett
 // par sekunder när man väljer 1-5 (utseendet styrs av #doughnutChart.flash)
-const PROGRESS_FLASH_MS = 2000;
+const PROGRESS_FLASH_MS = 1300;
 let progressFlashTimer = null;
 
 function flashProgressChart() {
