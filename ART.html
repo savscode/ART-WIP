@@ -261,27 +261,28 @@
         font-size: 14px;
       }
 
+      /* Linjerar med rubrik och text: 50px från kanten (se .header i step-common.css) */
       .quick-nav-art {
         right: auto;
-        left: 20px;
+        left: 50px;
       }
 
       /* Till höger om A R T-gruppen: 3 x 32px + 2 x 6px + 6px mellanrum */
       .quick-nav-info {
         right: auto;
-        left: calc(20px + 3 * 32px + 2 * 6px + 6px);
+        left: calc(50px + 3 * 32px + 2 * 6px + 6px);
       }
 
       /* Cirkeldiagrammet är dolt och blinkar bara fram (klassen .flash, se
          flashProgressChart() i script.js) i ett par sekunder när man väljer
-         1-5 - stort över hela skärmen på vit bakgrund med 30% opacitet.
+         1-5 - stort över hela skärmen på nästan helt vit bakgrund (85% opacitet).
          pointer-events: none så man kan trycka rakt igenom det. */
       #doughnutChart {
         top: 0;
         right: 0;
         width: 100%;
         height: 100%;
-        background: rgba(255, 255, 255, 0.3);
+        background: rgba(255, 255, 255, 0.85);
         z-index: 1500;
         pointer-events: none;
         opacity: 0;

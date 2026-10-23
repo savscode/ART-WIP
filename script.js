@@ -247,6 +247,10 @@ function updateSummaryChart() {
     
     myChart.clear();
 
+    // Mobil: etiketterna runt rosen är dolda (summary.html), så rosen får
+    // fylla nästan hela rutan
+    const roseOuterRadius = mobileQuery.matches ? '96%' : '80%';
+
     // Add support for action plan textarea
     const actionPlan = document.getElementById('actionPlan');
     if (actionPlan) {
@@ -396,7 +400,7 @@ function updateSummaryChart() {
             {
                 name: 'Max Value',
                 type: 'pie',
-                radius: ['5%', '80%'],
+                radius: ['5%', roseOuterRadius],
                 roseType: 'area',
                 avoidLabelOverlap: false,
                 silent: true,
@@ -423,7 +427,7 @@ function updateSummaryChart() {
             {
                 name: 'Data',
                 type: 'pie',
-                radius: ['5%', '80%'],
+                radius: ['5%', roseOuterRadius],
                 roseType: 'area',
                 avoidLabelOverlap: false,
                 itemStyle: {

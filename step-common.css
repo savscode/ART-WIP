@@ -188,10 +188,12 @@ body {
     }
 }
 
-/* Endast mobil: på steg 1-3 (sidorna med spalter) linjeras rubrik och ingress
-   med spalternas text nedanför (container 10px + column 20px = 30px) */
+/* Endast mobil: rubrik och ingress på alla sidor börjar 50px från kanten
+   (body 10+10 + 30px), i linje med spalternas text på steg 1-3 (container
+   10px + column 20px) och med cirkelmenyn i ART.html (left: 50px).
+   Används även av .next-page-preview i index.html - ändras det här, ändra där. */
 @media (max-width: 600px) {
-    .form-page:has(.container) .header {
+    .header {
         padding-left: 30px;
     }
 }

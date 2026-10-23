@@ -123,8 +123,21 @@
                 margin-top: 10px;
             }
 
+            /* Etiketterna runt rosen blir för små att läsa - dolda på mobil,
+               och rosen får hela rutan (yttre radie 96% istället för 80%,
+               se updateSummaryChart() i script.js) */
+            #labels-container {
+                display: none;
+            }
+
+            #roseChart {
+                width: 100%;
+                height: 100%;
+            }
+
             .top-categories {
                 margin-top: 0;
+                padding-left: 30px; /* Linjerar med rubriken (.header i step-common.css) */
             }
 
             .top-categories h2:first-child {
